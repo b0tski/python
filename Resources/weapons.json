@@ -1,0 +1,26 @@
+{
+    "army_knife": {
+        "name": "Army Knife",
+        "damage": 10
+    },
+    "brass_knuckles": {
+        "name": "Brass Knuckles",
+        "damage": 30
+    },
+    "crossbow": {
+        "name": "Crossbow",
+        "damage": 25
+    },
+    "slingshot": {
+        "name": "Slingshot",
+        "damage": 15
+    },
+    "sword": {
+        "name": "Sword",
+        "damage": 35
+    },
+    "bomb": {
+        "name": "Bomb",
+        "damage": 100
+    }
+}

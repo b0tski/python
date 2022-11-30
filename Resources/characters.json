@@ -1,15 +1,14 @@
 {
     "Jeff": {
-        "health" : 100,
-        "default_weapons" : "Army Knife" 
-        
+        "health": 100,
+        "default_weapons": "army_knife"
     },
     "Claire": {
-        "health" : 75,
-        "default_weapons" : "Crossbow" 
+        "health": 75,
+        "default_weapons": "crossbow"
     },
     "Samuel": {
-        "health" : 175,
-        "default_weapons" : "Brass Knuckles" 
+        "health": 175,
+        "default_weapons": "brass_knuckles"
     }
 }
