@@ -1,26 +1,31 @@
 {
-    "army_knife": {
+    "MELEE_army_knife": {
         "name": "Army Knife",
         "damage": 10
     },
-    "brass_knuckles": {
+    "MELEE_brass_knuckles": {
         "name": "Brass Knuckles",
         "damage": 30
     },
-    "crossbow": {
+    "BOW_crossbow": {
         "name": "Crossbow",
         "damage": 25
     },
-    "slingshot": {
+    "BOW_slingshot": {
         "name": "Slingshot",
         "damage": 15
     },
-    "sword": {
+    "MELEE_sword": {
         "name": "Sword",
         "damage": 35
     },
     "bomb": {
         "name": "Bomb",
         "damage": 100
+    },
+    "GUN_vandal": {
+        "name": "Vandal",
+        "damage": 160
     }
+    
 }
