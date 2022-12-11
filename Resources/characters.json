@@ -1,14 +1,14 @@
 {
     "Jeff": {
         "health": 100,
-        "default_weapons": "army_knife"
+        "default_weapons": "MELEE_army_knife"
     },
     "Claire": {
         "health": 75,
-        "default_weapons": "crossbow"
+        "default_weapons": "BOW_crossbow"
     },
     "Samuel": {
         "health": 175,
-        "default_weapons": "brass_knuckles"
+        "default_weapons": "MELEE_brass_knuckles"
     }
 }
