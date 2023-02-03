@@ -18,6 +18,7 @@ PLAYER_WHITE = (206, 209, 219)
 DARK_GRAY = (27, 31, 46)
 
 font = py.font.SysFont(None, 72)
+title_font = py.font.SysFont("serif typeface", 90)
 
 
 py.display.set_caption("PONG")
@@ -61,7 +62,10 @@ ball_y = 250
 ball_width = 20
 ball_height = 20
 ball = py.Rect(ball_x, ball_y, ball_width, ball_height)
-ball_speed = [7,0]
+ball_speed = [5,0]
+
+title_ball = py.Rect(ball_x, ball_y, ball_width, ball_height)
+title_ball_speed = [5,4]
 
 # Functions 
 
@@ -78,9 +82,58 @@ def score_p2():
 FPS = 100
 
 run = True
+title_run = True
 
+while title_run:
+
+    clock.tick(FPS)
+
+    for event in py.event.get():
+
+        if event.type == py.QUIT:
+            title_run = False
+            run = True
+
+
+
+    
+    title_ball[0] += title_ball_speed[0]
+    title_ball[1] += title_ball_speed[1]
+                
+        
+    if title_ball[1] > HEIGHT - title_ball[3] or title_ball[1] < 0:
+        title_ball_speed[1] *= -1
+
+# RIGHT SIDE
+    if title_ball[0] > WIDTH - title_ball[2]:
+        title_ball_speed[0] *= -1
+
+#LEFT SIDE
+    if title_ball[0] < 0:
+        title_ball_speed[0] *= -1
+
+    py.draw.rect(screen, PLAYER_WHITE, ball)
+
+    py.display.update
+
+    screen.fill(GRAY)
+    py.draw.rect(screen,PLAYER_WHITE, midline)
+
+    py.draw.rect(screen, PLAYER_WHITE, title_ball)
+
+    title = font.render("P O N G",True, PLAYER_WHITE)
+    screen.blit(title, (30, 50))
+
+
+
+
+    py.display.update()
+
+
+
+
+    #TITLE SCREEN
 while run:
-
     clock.tick(FPS)
 
     for event in py.event.get():
@@ -88,15 +141,14 @@ while run:
         if event.type == py.QUIT:
             run = False
 
+    #STARTING SCREEN
+    # while button_boolean == True:
+        # starting_button = py.draw.rect(screen, PLAYER_WHITE, (400, 250, button_width, button_height))
+        # if keys[py.CONTROLLER_BUTTON_LEFTSTICK] :
+        #     pass
     keys = py.key.get_pressed()
 
     screen.fill(GRAY)
-
-    # STARTING SCREEN
-    # while button_boolean == True:
-    #     starting_button = py.draw.rect(screen, PLAYER_WHITE, (400, 250, button_width, button_height))
-    #     if keys[py.CONTROLLER_BUTTON_LEFTSTICK] :
-    #         pass
 
     # DEFAULT SPEED
     ball[0] += ball_speed[0]
@@ -172,7 +224,7 @@ while run:
     score_p2()
 
     
-    # DRAWING
+    #DRAWING
     py.draw.rect(screen, PLAYER_WHITE, player_1)
     py.draw.rect(screen, PLAYER_WHITE, player_2)
     py.draw.rect(screen,PLAYER_WHITE, midline)
