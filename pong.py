@@ -5,7 +5,9 @@ import random
 import time
 
 
+py.mixer.init()
 py.init()
+
 clock = py.time.Clock()
 
 WIDTH = 800
@@ -30,9 +32,15 @@ again_font = py.font.SysFont("serif typeface", 40)
 py.display.set_caption("PONG")
 
 
+#MUSIC
+py.mixer.music.load("bounce2.ogg")
+py.mixer.music.set_volume(1)
+
+
+
 #TIMER
 
-timer = 60
+timer = 1
 
 
 # STARTING BUTTON
@@ -165,7 +173,7 @@ while title_run:
     screen.blit(next_text, (579, 405))
 
     mouse = py.mouse.get_pos()
-    print(mouse)
+    # print(mouse)
 
     if event.type == py.MOUSEBUTTONDOWN:
         if next_button[0] <= mouse[0] <= next_button[0] + next_button[2] and next_button[1] <= mouse[1] < next_button[1] + next_button[3]:
@@ -201,8 +209,6 @@ while run:
     seconds= int((second_time) / 1000)
     calculate_time = (timer - seconds)
     time = font.render(str(calculate_time), False, PLAYER_WHITE)
-
-    print(seconds)
     screen.blit(time, (10, 10))
 
     if calculate_time <= 0:
@@ -236,10 +242,10 @@ while run:
     
     if ball[1] > HEIGHT - ball[3] or ball[1] < 0:
         ball_speed[1] *= -1
-
+        py.mixer.music.play()
     # RIGHT SIDE
     if ball[0] > WIDTH - ball[2]:
-
+        py.mixer.music.play()
         p1_score +=1
         first_bounce = True    
         tip_off()
@@ -247,7 +253,7 @@ while run:
 
     #LEFT SIDE
     if ball[0] < 0:
-
+        py.mixer.music.play()
         p2_score += 1
         first_bounce = True
         tip_off()
@@ -263,6 +269,7 @@ while run:
                 ball_speed[1] = -2            
             if rand_direction == 0:
                 ball_speed[1] = 2
+        py.mixer.music.play()
 
         if rand_direction == 1:
             ball_speed[0] *= -1  
@@ -277,7 +284,8 @@ while run:
                 ball_speed[1] = -2            
             if rand_direction == 0:
                 ball_speed[1] = 2
-            
+        py.mixer.music.play()
+
         if rand_direction == 1:
             ball_speed[0] *= -1  
             ball_speed[1] *= -1
@@ -303,7 +311,7 @@ while run:
 #DECORATIONS
 big_square = py.Rect(50,50,700,350)
 underline = py.Rect(305, 120, 190, 12)
-play_again_button = py.Rect(315, 340, 180, 35)
+play_again_button = py.Rect(310, 340, 180, 35)
 
 
 
@@ -338,16 +346,19 @@ while final_screen:
     screen.blit(title_winner, (275, 60))
     #Winner
     if p1_score > p2_score:
-        winner = title_font.render("PLAYER 1", False, PLAYER_WHITE)
-        screen.blit(winner, (275, 150))
-    else:
+        winner = next_font.render("PLAYER 1", False, PLAYER_WHITE)
+        screen.blit(winner, (290, 200))
+    elif p1_score < p2_score:
         winner = next_font.render("PLAYER 2", False, PLAYER_WHITE)
         screen.blit(winner, (290, 200))
+    else:
+        winner = next_font.render("TIE", False, PLAYER_WHITE)
+        screen.blit(winner, (355, 200))
     #PLAY AGAIN BUTTON
     py.draw.rect(screen, PLAYER_WHITE, play_again_button)
     #PLAY AGAIN TEXT
     play_again = again_font.render("PLAY AGAIN", False, GRAY)
-    screen.blit(play_again, (320, 345))
+    screen.blit(play_again, (play_again_button[0] + 5, 345))
 
     py.display.update()
 
