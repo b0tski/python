@@ -2,30 +2,44 @@
 
 import pygame as py
 import random
+import time
 
 
 py.init()
 clock = py.time.Clock()
 
 WIDTH = 800
-HEIGHT = 500
-screen = py.display.set_mode((WIDTH,HEIGHT))
+HEIGHT = WIDTH / 16*9
+flags = py.SCALED | py.FULLSCREEN
+screen = py.display.set_mode((WIDTH,HEIGHT), flags = flags, vsync=1)
 
 
 # COLOR
 GRAY = (60, 64, 77)
 PLAYER_WHITE = (206, 209, 219)
-DARK_GRAY = (27, 31, 46)
+DARK_GRAY = (152, 152, 158)
 
 font = py.font.SysFont(None, 72)
 title_font = py.font.SysFont("serif typeface", 90)
 
+second_font = py.font.SysFont(None, 50)
+next_font = py.font.SysFont("serif typeface", 70)
+again_font = py.font.SysFont("serif typeface", 40)
+
 
 py.display.set_caption("PONG")
 
+
+#TIMER
+
+timer = 60
+
+
 # STARTING BUTTON
-button_width = 50
-button_height = 75
+button_width = 130
+button_height = 45
+next_button = py.Rect(560, 400, button_width, button_height)
+
 
 
 button_boolean = True 
@@ -40,6 +54,7 @@ player_1 = py.Rect(p1_x, p1_y, p1_width, p1_height)
 p1_vel = 3
 p1_score = 0
 
+
 #PLAYER 2 PHYSICS
 
 p2_x = 735
@@ -51,19 +66,22 @@ player_2 = py.Rect(p2_x, p2_y, p2_width, p2_height)
 p2_vel = 3
 p2_score = 0
 
+
 # MID LINE
 midline = py.Rect(399,0,10,500)
 
 #BALL PYISICS
 
-first_bounce = 1
-ball_x = 385
-ball_y = 250
+first_bounce = True
+ball_x = WIDTH / 2
+ball_y = HEIGHT / 2
+
 ball_width = 20
 ball_height = 20
 ball = py.Rect(ball_x, ball_y, ball_width, ball_height)
 ball_speed = [5,0]
 
+# TITLE BALL
 title_ball = py.Rect(ball_x, ball_y, ball_width, ball_height)
 title_ball_speed = [5,4]
 
@@ -72,17 +90,32 @@ title_ball_speed = [5,4]
 def score_p1():
 
     text_score1 = font.render(str(p1_score), True, PLAYER_WHITE)
-    screen.blit(text_score1, (325, 450))
+    screen.blit(text_score1, (325, 400))
+
 
 
 def score_p2():
     text_score2 = font.render(str(p2_score), True, PLAYER_WHITE)
-    screen.blit(text_score2, (450, 450))
+    screen.blit(text_score2, (450, 400))
+
+def tip_off():
+
+    ball[0] = ball_x
+    ball[1] = ball_y
+    ball_speed[1] = 0
+    player_1[1] = p1_y
+    player_2[1] = p2_y
+    py.time.wait(500)
+ 
+
+
 
 FPS = 100
 
-run = True
+# RUNS LOOPS
 title_run = True
+run = False
+final_screen = False
 
 while title_run:
 
@@ -92,10 +125,12 @@ while title_run:
 
         if event.type == py.QUIT:
             title_run = False
-            run = True
+        if event.type == py.KEYDOWN:
+            if event.key == py.K_ESCAPE:
+                title_run = False
 
 
-
+    first_time = py.time.get_ticks()
     
     title_ball[0] += title_ball_speed[0]
     title_ball[1] += title_ball_speed[1]
@@ -111,24 +146,37 @@ while title_run:
 #LEFT SIDE
     if title_ball[0] < 0:
         title_ball_speed[0] *= -1
-
+ 
+    # DRAWINGS
     py.draw.rect(screen, PLAYER_WHITE, ball)
 
-    py.display.update
 
     screen.fill(GRAY)
     py.draw.rect(screen,PLAYER_WHITE, midline)
 
     py.draw.rect(screen, PLAYER_WHITE, title_ball)
 
-    title = font.render("P O N G",True, PLAYER_WHITE)
-    screen.blit(title, (30, 50))
+    title = font.render("P O N G",False, PLAYER_WHITE)
+    screen.blit(title, (30, 35))
+
+# NEXTT BUTTON
+    py.draw.rect(screen, PLAYER_WHITE, next_button)
+    next_text = second_font.render("NEXT", False, GRAY)
+    screen.blit(next_text, (579, 405))
+
+    mouse = py.mouse.get_pos()
+    print(mouse)
+
+    if event.type == py.MOUSEBUTTONDOWN:
+        if next_button[0] <= mouse[0] <= next_button[0] + next_button[2] and next_button[1] <= mouse[1] < next_button[1] + next_button[3]:
+            title_run = False
+            run = True
+
 
 
 
 
     py.display.update()
-
 
 
 
@@ -140,15 +188,26 @@ while run:
 
         if event.type == py.QUIT:
             run = False
+        if event.type == py.KEYDOWN:
+            if event.key == py.K_ESCAPE:
+                run = False
 
-    #STARTING SCREEN
-    # while button_boolean == True:
-        # starting_button = py.draw.rect(screen, PLAYER_WHITE, (400, 250, button_width, button_height))
-        # if keys[py.CONTROLLER_BUTTON_LEFTSTICK] :
-        #     pass
     keys = py.key.get_pressed()
 
     screen.fill(GRAY)
+
+    second_time = (py.time.get_ticks() - first_time)
+     # mainloop
+    seconds= int((second_time) / 1000)
+    calculate_time = (timer - seconds)
+    time = font.render(str(calculate_time), False, PLAYER_WHITE)
+
+    print(seconds)
+    screen.blit(time, (10, 10))
+
+    if calculate_time <= 0:
+        run = False
+        final_screen = True
 
     # DEFAULT SPEED
     ball[0] += ball_speed[0]
@@ -180,27 +239,31 @@ while run:
 
     # RIGHT SIDE
     if ball[0] > WIDTH - ball[2]:
-        ball_speed[0] *= -1
+
         p1_score +=1
+        first_bounce = True    
+        tip_off()
 
 
     #LEFT SIDE
     if ball[0] < 0:
-        ball_speed[0] *= -1
+
         p2_score += 1
+        first_bounce = True
+        tip_off()
 
 
     rand_direction = random.randint(0,1)
 
-
     # Ball collisioin 
     if player_1.colliderect(ball):
-        if first_bounce == 1:
+        if first_bounce == True:
+            first_bounce = False
             if rand_direction == 1:
                 ball_speed[1] = -2            
             if rand_direction == 0:
                 ball_speed[1] = 2
-        first_bounce -= 1
+
         if rand_direction == 1:
             ball_speed[0] *= -1  
             ball_speed[1] *= -1
@@ -208,12 +271,13 @@ while run:
             ball_speed[0] *= -1
     
     if player_2.colliderect(ball):
-        if first_bounce == 1:
+        if first_bounce == True:
+            first_bounce = False           
             if rand_direction == 1:
                 ball_speed[1] = -2            
             if rand_direction == 0:
                 ball_speed[1] = 2
-        first_bounce -= 1               
+            
         if rand_direction == 1:
             ball_speed[0] *= -1  
             ball_speed[1] *= -1
@@ -231,10 +295,60 @@ while run:
 
     py.draw.rect(screen, PLAYER_WHITE, ball)
 
-
-
-
     py.display.update()
 
+
+
+
+#DECORATIONS
+big_square = py.Rect(50,50,700,350)
+underline = py.Rect(305, 120, 190, 12)
+play_again_button = py.Rect(315, 340, 180, 35)
+
+
+
+
+while final_screen:
+    clock.tick(FPS)
+
+    for event in py.event.get():
+
+        if event.type == py.QUIT:
+            final_screen = False
+        if event.type == py.KEYDOWN:
+            if event.key == py.K_ESCAPE:
+                final_screen = False
+
+    mouse = py.mouse.get_pos()
+
+    #play again hitbot
+    if event.type == py.MOUSEBUTTONDOWN:
+        if play_again_button[0] <= mouse[0] <= play_again_button[0] + play_again_button[2] and play_again_button[1] <= mouse[1] < play_again_button[1] + play_again_button[3]:
+            final_screen = False
+            title_run = True
+
+    
+    screen.fill(DARK_GRAY)
+    # Big Square
+    py.draw.rect(screen, GRAY, big_square)
+    #underline
+    py.draw.rect(screen, PLAYER_WHITE, underline)    
+    #Title Winner
+    title_winner = title_font.render("WINNER", False, PLAYER_WHITE)
+    screen.blit(title_winner, (275, 60))
+    #Winner
+    if p1_score > p2_score:
+        winner = title_font.render("PLAYER 1", False, PLAYER_WHITE)
+        screen.blit(winner, (275, 150))
+    else:
+        winner = next_font.render("PLAYER 2", False, PLAYER_WHITE)
+        screen.blit(winner, (290, 200))
+    #PLAY AGAIN BUTTON
+    py.draw.rect(screen, PLAYER_WHITE, play_again_button)
+    #PLAY AGAIN TEXT
+    play_again = again_font.render("PLAY AGAIN", False, GRAY)
+    screen.blit(play_again, (320, 345))
+
+    py.display.update()
 
 py.quit()
