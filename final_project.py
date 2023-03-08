@@ -1,26 +1,65 @@
 import pygame as py
+import time 
+
+py.init()
 
 WIDTH = 1024
 HEIGHT = WIDTH / 16*9
 player_info = None
 player_size = 20
 
+
+
 screen = py.display.set_mode((WIDTH,HEIGHT))
 py.display.set_caption("TAG")
+clock_font = py.font.SysFont("serif typeface", 60)
 
 # COLORS
+WHITE = (206, 209, 219)
 RED = (255,0,0)
 BLUE = (0,0,255)
 FREEZE_COLOR = (66, 167, 245)
 YELLOW = (14,190,230)
 WALL_COLOR = (77, 76, 76)
 
+
+class Button(py.sprite.Sprite):
+  def __init__(self, RGB, button_x, button_y, button_width, button_height):
+    """Creates a button to interact with"""
+    
+    py.sprite.Sprite.__init__(self)
+    self.image = py.Surface([button_width, button_height])
+    self.rect = self.image.get_rect()
+    self.image.fill(RGB)
+    self.rect.x = button_x
+    self.rect.y = button_y
+
+button_sprites = py.sprite.Group()
+button_1 = Button(WHITE, 300,200,100,50)
+button_sprites.add(button_1)
+
+
+#INFO SCREEN
+running_info = True 
+
+while running_info:
+  for event in py.event.get():
+    if event.type == py.QUIT:
+      running_info = False
+  
+  button_sprites.update()
+  py.display.update()
+  screen.fill((25,25,25))
+
+
+  button_sprites.draw(screen)
+  
+
 class Player(py.sprite.Sprite):
   
   def __init__(self, player_x, player_y, RGB):
-
+    
     py.sprite.Sprite.__init__(self)
-
     self.image = py.Surface([player_size, player_size])
     self.rect = self.image.get_rect()
     self.image.fill(RGB)
@@ -28,6 +67,7 @@ class Player(py.sprite.Sprite):
     self.rect.y = player_y
     self.p_vel = 3
     self.tagged = False
+
 
    
 #CONTROLS
@@ -58,41 +98,47 @@ class Player(py.sprite.Sprite):
   # DETECTS COLLISION WITH THE WALLS
   def player_wall_right_x(self, player):
     if py.sprite.spritecollideany(player, wall_sprites):
-      self.rect.x -= self.p_vel
+      self.rect.x -= self.p_vel +1
   def player_wall_up_y(self, player):
     if py.sprite.spritecollideany(player, wall_sprites):
-      self.rect.y += self.p_vel
+      self.rect.y += self.p_vel +1
   def player_wall_left_x(self, player):
     if py.sprite.spritecollideany(player, wall_sprites):
-      self.rect.x += self.p_vel
+      self.rect.x += self.p_vel +1
   def player_wall_down_y(self, player):
     if py.sprite.spritecollideany(player, wall_sprites):
-      self.rect.y -= self.p_vel
+      self.rect.y -= self.p_vel +1
 
   
   #DETECTS COLLISION WITH SLOW WALLS
   #right
   def player_slow_wall_right_x(self, player):
     if py.sprite.spritecollideany(player, slow_wall_sprites):
-      self.rect.x -= 2
+      self.rect.x -= self.p_vel -1
   #left
   def player_slow_wall_left_x(self, player):
     if py.sprite.spritecollideany(player, slow_wall_sprites):
-      self.rect.x += 2  
+      self.rect.x += self.p_vel -1
   #up    
   def player_slow_wall_up_y(self, player):
     if py.sprite.spritecollideany(player, slow_wall_sprites):
-      self.rect.y += 2
+      self.rect.y += self.p_vel -1
   #down
   def player_slow_wall_down_y(self, player):
     if py.sprite.spritecollideany(player, slow_wall_sprites):
-      self.rect.y -= 2
+      self.rect.y -= self.p_vel -1
 
-
+  
+      
   #TAGGED
   def tag(self, player):
-    if py.sprite.spritecollideany(player, slow_wall_sprites):
-      pass
+    self.tagged = True
+    player.tagged = False
+    self.p_vel = 4
+    player.p_vel = 3
+
+
+
 
 #CREATES THE PLAYERS AND ADDS THEM TO PLAYER SPRITE GROUP
 player_1_sprite = py.sprite.Group()
@@ -150,38 +196,20 @@ slow_wall_sprites.add(slow_wall_1, slow_wall_2, slow_wall_3, slow_wall_4, slow_w
 
 
 
-# class SlowOrb:
-#   def __init__(self, slow_x, slow_y):
-#     self.slow_x = slow_x
-#     self.slow_y = slow_y
-#     self.slow_vel = 1
-    
-#   #CREATES THE SLOW ORBS 
-#   def create_slows(self, screen):
-#     py.draw.rect(screen, FREEZE_COLOR, self.slow_x, self.slow_y, 8,8)
-
-
-
-# class InverOrb:
-#   def __init__(self, invert_x, invert_y):
-#     self.invert_x = invert_x
-#     self.invert_y = invert_y
-#     self.invert_vel = 2
-
-#   # DRAWS INVERT ORBS 
-#   def create_invert(self, screen):
-#     py.display.rect(screen, YELLOW, (self.inver_x, self.invert_y, 5,5))
-
-
-
 clock = py.time.Clock()
 FPS = 60
 
 all_sprites = py.sprite.Group()
 all_sprites.add(player_1_sprite, player_2_sprite, wall_sprites, slow_wall_sprites)
 
+player_1.tagged = True
+player_1.p_vel = 4
 
-running = True
+# AMOUNT OF TIME ON THE CLOCK
+timer = 15
+
+running = False
+
 while running:
   for event in py.event.get():
     if event.type == py.QUIT:
@@ -198,6 +226,13 @@ while running:
 
 #BACKROUND
   screen.fill((25,25,25))
+
+  #CLOCK
+  timer -= 1/FPS
+  game_clock = clock_font.render(str(int(timer + 1)), False, WHITE)
+  if timer < 0: 
+    running = False
+
 
 # PLAYER CONTROLS 
   keys = py.key.get_pressed()
@@ -235,14 +270,44 @@ while running:
     player_2.player_wall_right_x(player_2)
     player_2.player_slow_wall_right_x(player_2)
 
+    # COOLDOWN CLOCK
+  # run_collision = True
+  invincible = 1
+  # cooldown_timer = 3
+
     
-  #DETECT PLAYER COLLISION
-  if py.sprite.spritecollideany(player_1, player_2_sprite):
-    if player_1.tagged == False:
+     #DETECTS IF PLAYERS COLLIDE
+  if invincible == 3: 
+    player_1.image.fill(WHITE)
+    time_invincible = py.time.get_ticks()
+    if py.time.get_ticks() - time_invincible > 3000:
       print("test")
-  if py.sprite.spritecollideany(player_2, player_1_sprite):
-    if player_2.tagged == False:
-      pass
+      invincible -= 1
+      print(invincible)
+    
+  if invincible == 4: 
+    time_invincible = py.time.get_ticks()
+    if py.time.get_ticks() - time_invincible < 3000:
+        print(time_invincible)
+        invincible -= 3
+  
+  if py.sprite.spritecollideany(player_1, player_2_sprite):
+    time_invincible  = py.time.get_ticks()
+
+
+    if invincible == 1:
+      invincible += 2
+      player_2.tag(player_1)
+      
+      
+
+    if invincible == 2:  
+  
+      invincible += 2
+      print(invincible)
+      player_1.tag(player_2)
+    
+      
     
   #DRAWING THE WALLS
   wall_sprites.draw(screen)
@@ -254,7 +319,13 @@ while running:
 
   player_2_sprite.draw(screen)
   player_2.player_border_collision()
-  
+
+
+  # DRAWS THE CLOCK
+  if timer < 9:
+    screen.blit(game_clock, (500, 7))   
+  else: 
+    screen.blit(game_clock, (488, 7))
   
 py.quit()
 quit()
