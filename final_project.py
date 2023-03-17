@@ -8,22 +8,30 @@ HEIGHT = WIDTH / 16*9
 player_info = None
 player_size = 20
 
-
+#LOOPS 
+running_info = True 
+running = False
+running_ending = False
 
 screen = py.display.set_mode((WIDTH,HEIGHT))
 py.display.set_caption("TAG")
+
+#TYPES OF FONTS
 clock_font = py.font.SysFont("serif typeface", 60)
+info_font = py.font.SysFont("serif typeface", 40)
+button_font = py.font.SysFont("serif typeface", 65)
+
 
 # COLORS
 WHITE = (206, 209, 219)
 RED = (255,0,0)
 BLUE = (0,0,255)
 FREEZE_COLOR = (66, 167, 245)
-YELLOW = (14,190,230)
+YELLOW = (251, 248, 45 )
 WALL_COLOR = (77, 76, 76)
 
 
-class Button(py.sprite.Sprite):
+class Object(py.sprite.Sprite):
   def __init__(self, RGB, button_x, button_y, button_width, button_height):
     """Creates a button to interact with"""
     
@@ -34,10 +42,44 @@ class Button(py.sprite.Sprite):
     self.rect.x = button_x
     self.rect.y = button_y
 
-button_sprites = py.sprite.Group()
-button_1 = Button(WHITE, 300,200,100,50)
-button_sprites.add(button_1)
 
+  def update_button(self):
+
+    mouse_pos = py.mouse.get_pos()
+    mouse_buttons = py.mouse.get_pressed()
+
+    if self.rect.collidepoint(mouse_pos) and any(mouse_buttons):
+      global running_info, running
+      print("HI")
+      running = True
+      running_info = False     
+
+      
+
+object_sprites = py.sprite.Group()
+button_sprites = py.sprite.Group()
+all_title_sprites = py.sprite.Group()
+button = Object(WHITE, 700,400,140,55)
+line_1 = Object(WHITE, 120, 90, 250, 20)
+info_player_1 = Object(RED, 75, 160, 20, 20)
+info_player_2 = Object(BLUE, 75, 230, 20,20)
+wall_info = Object(WALL_COLOR, 72, 300, 26, 50)
+slow_wall_info = Object(FREEZE_COLOR, 72, 390, 26, 50)
+divide_line = Object(WHITE, 505, 0, 25, HEIGHT)
+tag_info = Object(YELLOW, 75, 500, 20, 20)
+button_sprites.add(button)
+object_sprites.add(line_1, info_player_1, info_player_2, wall_info, slow_wall_info, divide_line, tag_info)
+all_title_sprites.add(button_sprites, object_sprites)
+
+
+# WORDS
+info_title = clock_font.render("INFO", False, WHITE)
+player_1_text = info_font.render("- PLAYER 1", False, WHITE)
+player_2_text = info_font.render("- PLAYER 2", False, WHITE)
+wall_text = info_font.render("- WALL", False, WHITE)
+slow_wall_text = info_font.render("- SLOWS PALYER DOWN", False, WHITE)
+next_button_text = button_font.render("NEXT", False, (25,25,25))
+tag_text = info_font.render("- TAGGED", False, WHITE)
 
 #INFO SCREEN
 running_info = True 
@@ -46,13 +88,26 @@ while running_info:
   for event in py.event.get():
     if event.type == py.QUIT:
       running_info = False
-  
-  button_sprites.update()
+
+  all_title_sprites.update()
+  button.update_button()
   py.display.update()
   screen.fill((25,25,25))
 
+# DRAW OBJECTS 
+  all_title_sprites.draw(screen)
 
-  button_sprites.draw(screen)
+  #DRAW WORDS 
+  screen.blit(info_title, (200,40))
+  screen.blit(player_1_text, (110, 157))
+  screen.blit(player_2_text, (110, 227))
+  screen.blit(wall_text, (110, 312))
+  screen.blit(slow_wall_text, (110, 400))
+  screen.blit(next_button_text, (710, 409))
+  screen.blit(tag_text, (110, 498))
+
+
+
   
 
 class Player(py.sprite.Sprite):
@@ -131,11 +186,26 @@ class Player(py.sprite.Sprite):
   
       
   #TAGGED
-  def tag(self, player):
-    self.tagged = True
-    player.tagged = False
+  def tag(self, player, color):
+    # self.tagged = True
+    # player.tagged = False
     self.p_vel = 4
+    self.image.fill(YELLOW)
     player.p_vel = 3
+    player.image.fill(color)
+
+
+  #INVINCIBLE FRAMES 
+    
+  def timer(self, time_ticks, player):
+    print("test")
+    if time_ticks - py.time.get_ticks() > 5000:
+      self.tagged = False
+      player.tagged = True
+      print("TEST")
+    
+
+    
 
 
 
@@ -204,11 +274,11 @@ all_sprites.add(player_1_sprite, player_2_sprite, wall_sprites, slow_wall_sprite
 
 player_1.tagged = True
 player_1.p_vel = 4
+player_1.image.fill(YELLOW)
 
 # AMOUNT OF TIME ON THE CLOCK
-timer = 15
+timer = 60
 
-running = False
 
 while running:
   for event in py.event.get():
@@ -232,6 +302,7 @@ while running:
   game_clock = clock_font.render(str(int(timer + 1)), False, WHITE)
   if timer < 0: 
     running = False
+    running_ending = True 
 
 
 # PLAYER CONTROLS 
@@ -272,41 +343,26 @@ while running:
 
     # COOLDOWN CLOCK
   # run_collision = True
-  invincible = 1
-  # cooldown_timer = 3
 
-    
-     #DETECTS IF PLAYERS COLLIDE
-  if invincible == 3: 
-    player_1.image.fill(WHITE)
-    time_invincible = py.time.get_ticks()
-    if py.time.get_ticks() - time_invincible > 3000:
-      print("test")
-      invincible -= 1
-      print(invincible)
-    
-  if invincible == 4: 
-    time_invincible = py.time.get_ticks()
-    if py.time.get_ticks() - time_invincible < 3000:
-        print(time_invincible)
-        invincible -= 3
-  
   if py.sprite.spritecollideany(player_1, player_2_sprite):
-    time_invincible  = py.time.get_ticks()
+    if player_1.tagged == True:
+      player_2.tag(player_1, RED)
+      collision_time = py.time.get_ticks()
+      print(collision_time)
+      player_1.timer(collision_time, player_2)
+        
 
 
-    if invincible == 1:
-      invincible += 2
-      player_2.tag(player_1)
-      
-      
+      # if player_2.tagged == True:
+      #   player_1.tag(player_2, BLUE)
+      #   collision_time = py.time.get_ticks()
+      #   print(collision_time)
+      #   player_2.timer(collision_time, player_1)
 
-    if invincible == 2:  
+
+
   
-      invincible += 2
-      print(invincible)
-      player_1.tag(player_2)
-    
+
       
     
   #DRAWING THE WALLS
@@ -326,6 +382,19 @@ while running:
     screen.blit(game_clock, (500, 7))   
   else: 
     screen.blit(game_clock, (488, 7))
+
+
+
+
+while running_ending:
+  for event in py.event.get():
+    if event.type == py.QUIT:
+      running_ending = False
+
+  clock.ticks(FPS)
+  py.display.update()
+
   
+      
 py.quit()
 quit()
